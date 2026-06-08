@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>คีย์คะแนน — ห้องเรียนสะอาด</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .score-label-num {
+      display      : inline-flex;
+      align-items  : center;
+      justify-content: center;
+      width        : 1.5rem;
+      height       : 1.5rem;
+      background   : var(--primary);
+      color        : var(--white);
+      border-radius: 50%;
+      font-size    : .75rem;
+      font-weight  : 700;
+      margin-right : .375rem;
+      flex-shrink  : 0;
+    }
+    .criteria-name {
+      display    : flex;
+      align-items: center;
+    }
+    .total-display {
+      font-size  : 2rem;
+      font-weight: 700;
+      color      : var(--primary);
+      line-height: 1;
+    }
+    .total-max {
+      font-size: 1rem;
+      color    : var(--gray-400);
+    }
+    .section-header {
+      display        : flex;
+      align-items    : center;
+      justify-content: space-between;
+      margin-bottom  : 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <span>🏫</span>ห้องเรียนสะอาด
+      </a>
+      <div class="navbar-menu">
+        <span class="navbar-user" id="display-name"></span>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">ออกจากระบบ</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main ───────────────────────────────────────────── -->
+  <main class="container" style="padding: 1.5rem 1rem 3rem;">
+
+    <!-- ── ส่วนเลือกวันและห้อง ──────────────────────────── -->
+    <div class="card mb-4">
+      <div class="card-title">📅 เลือกวันที่และห้องเรียน</div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <!-- วันที่ -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="input-date">วันที่ตรวจ</label>
+          <input type="date" id="input-date" class="form-control" />
+        </div>
+
+        <!-- ห้องเรียน -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="input-room">ห้องเรียน</label>
+          <select id="input-room" class="form-control">
+            <option value="">— เลือกห้อง —</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-outline mt-3" id="btn-load" style="width:100%;">
+        🔍 โหลดข้อมูล / เริ่มคีย์ใหม่
+      </button>
+    </div>
+
+    <!-- ── ส่วนคีย์คะแนน (ซ่อนไว้ก่อน) ─────────────────── -->
+    <div id="score-section" class="hidden">
+
+      <!-- Alert -->
+      <div id="alert" class="alert hidden"></div>
+
+      <div class="card mb-4">
+        <div class="section-header">
+          <div class="card-title" style="margin-bottom:0; border:none; padding:0;">
+            📝 กรอกคะแนนแต่ละหัวข้อ
+          </div>
+          <!-- แสดงคะแนนรวม real-time -->
+          <div style="text-align:right;">
+            <div class="total-display" id="total-display">0</div>
+            <div class="total-max">/ 21 คะแนน</div>
+          </div>
+        </div>
+
+        <!-- badge แจ้งว่าเป็นข้อมูลใหม่หรือแก้ไข -->
+        <div id="mode-badge" class="alert alert-warning hidden" style="margin-bottom:1rem;"></div>
+
+        <div style="overflow-x: auto;">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th style="width:50%;">หัวข้อ</th>
+                <th style="width:50%;">คะแนน (0–3)</th>
+              </tr>
+            </thead>
+            <tbody id="criteria-tbody"></tbody>
+            <!-- row คะแนนรวม -->
+            <tfoot>
+              <tr class="score-total-row">
+                <td><strong>คะแนนรวม</strong></td>
+                <td><strong id="total-display-foot">0</strong> / 21</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ปุ่ม Save -->
+      <div style="display:flex; gap:.75rem; flex-wrap:wrap;">
+        <button class="btn btn-success" id="btn-save" style="flex:1;">
+          💾 บันทึกคะแนน
+        </button>
+        <button class="btn btn-outline" id="btn-reset" style="flex:1;">
+          🔄 ล้างข้อมูล
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ── Loading spinner ────────────────────────────────── -->
+    <div id="loading" class="spinner-wrap hidden">
+      <div class="spinner"></div>
+      <span>กำลังโหลด...</span>
+    </div>
+
+  </main>
+
+  <!-- ── Scripts ─────────────────────────────────────────── -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // ── ตรวจสอบ login ────────────────────────────────────
+    const session = requireLogin();
+    if (session) {
+      document.getElementById('display-name').textContent = session.display_name;
+    }
+
+    // ── Elements ──────────────────────────────────────────
+    const inputDate    = document.getElementById('input-date');
+    const inputRoom    = document.getElementById('input-room');
+    const btnLoad      = document.getElementById('btn-load');
+    const btnSave      = document.getElementById('btn-save');
+    const btnReset     = document.getElementById('btn-reset');
+    const scoreSection = document.getElementById('score-section');
+    const criteriaTbody= document.getElementById('criteria-tbody');
+    const alertEl      = document.getElementById('alert');
+    const loadingEl    = document.getElementById('loading');
+    const modeBadge    = document.getElementById('mode-badge');
+    const totalDisplay = document.getElementById('total-display');
+    const totalFoot    = document.getElementById('total-display-foot');
+
+    // ── ตั้งค่าวันที่เริ่มต้นเป็นวันนี้ ──────────────────
+    const today = new Date();
+    const yyyy  = today.getFullYear();
+    const mm    = String(today.getMonth() + 1).padStart(2, '0');
+    const dd    = String(today.getDate()).padStart(2, '0');
+    inputDate.value = `${yyyy}-${mm}-${dd}`;
+
+    // ── โหลดรายชื่อห้องลง dropdown ───────────────────────
+    async function loadRooms() {
+      try {
+        const res = await API.getRooms();
+        if (!res.success) return;
+
+        // จัดกลุ่มตาม building
+        const grouped = {};
+        res.rooms.forEach(r => {
+          if (!grouped[r.building]) grouped[r.building] = [];
+          grouped[r.building].push(r);
+        });
+
+        // สร้าง optgroup แยกตามอาคาร
+        Object.keys(grouped).sort().forEach(building => {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = building;
+          grouped[building].forEach(r => {
+            const opt   = document.createElement('option');
+            opt.value   = r.room_id;
+            opt.textContent = `${r.room_id} — ${r.homeroom}`;
+            optgroup.appendChild(opt);
+          });
+          inputRoom.appendChild(optgroup);
+        });
+
+      } catch (err) {
+        showAlert('โหลดรายชื่อห้องไม่ได้: ' + err.message);
+      }
+    }
+
+    // ── สร้าง radio buttons 7 หัวข้อ ─────────────────────
+    function buildCriteriaRows() {
+      criteriaTbody.innerHTML = '';
+      CONFIG.CRITERIA.forEach((label, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="criteria-name">
+              <span class="score-label-num">${i + 1}</span>
+              ${label}
+            </div>
+          </td>
+          <td>
+            <div class="score-options">
+              ${[0,1,2,3].map(v => `
+                <input type="radio" name="c${i}" id="c${i}_${v}" value="${v}" />
+                <label for="c${i}_${v}">${v}</label>
+              `).join('')}
+            </div>
+          </td>
+        `;
+        criteriaTbody.appendChild(tr);
+      });
+
+      // ฟัง event เปลี่ยนคะแนน → อัปเดต total
+      criteriaTbody.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', updateTotal);
+      });
+    }
+
+    // ── อัปเดตคะแนนรวม real-time ─────────────────────────
+    function updateTotal() {
+      let total = 0;
+      CONFIG.CRITERIA.forEach((_, i) => {
+        const checked = criteriaTbody.querySelector(`input[name="c${i}"]:checked`);
+        if (checked) total += parseInt(checked.value);
+      });
+      totalDisplay.textContent = total;
+      totalFoot.textContent    = total;
+
+      // เปลี่ยนสีตามระดับคะแนน
+      if (total >= 18) {
+        totalDisplay.style.color = 'var(--success)';
+      } else if (total >= 12) {
+        totalDisplay.style.color = 'var(--warning)';
+      } else {
+        totalDisplay.style.color = 'var(--danger)';
+      }
+    }
+
+    // ── กรอกคะแนนจากข้อมูลเดิม (กรณีแก้ไข) ─────────────
+    function fillScores(scores) {
+      scores.forEach((val, i) => {
+        const radio = criteriaTbody.querySelector(`input[name="c${i}"][value="${val}"]`);
+        if (radio) radio.checked = true;
+      });
+      updateTotal();
+    }
+
+    // ── ล้างคะแนนทั้งหมด ──────────────────────────────────
+    function resetScores() {
+      criteriaTbody.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+      totalDisplay.textContent  = '0';
+      totalFoot.textContent     = '0';
+      totalDisplay.style.color  = 'var(--primary)';
+      modeBadge.className       = 'alert alert-warning hidden';
+    }
+
+    // ── โหลดข้อมูล / เริ่มคีย์ใหม่ ───────────────────────
+    async function handleLoad() {
+      const date    = inputDate.value;
+      const room_id = inputRoom.value;
+
+      if (!date) { showAlert('กรุณาเลือกวันที่'); return; }
+      if (!room_id) { showAlert('กรุณาเลือกห้องเรียน'); return; }
+
+      hideAlert();
+      setLoading(true);
+      buildCriteriaRows();
+
+      try {
+        const res = await API.getScoreByDateRoom(date, room_id);
+
+        if (res.success && res.found) {
+          // มีข้อมูลเดิม → โหลดมาแสดงเพื่อแก้ไข
+          fillScores(res.scores);
+          modeBadge.textContent = `✏️ พบข้อมูลเดิมของห้อง ${room_id} วันที่ ${date} — กำลังแก้ไข`;
+          modeBadge.className   = 'alert alert-warning';
+        } else {
+          // ยังไม่มีข้อมูล → คีย์ใหม่
+          resetScores();
+          modeBadge.textContent = `🆕 คีย์ข้อมูลใหม่ ห้อง ${room_id} วันที่ ${date}`;
+          modeBadge.className   = 'alert alert-success';
+        }
+
+        scoreSection.classList.remove('hidden');
+
+      } catch (err) {
+        showAlert('โหลดข้อมูลไม่ได้: ' + err.message);
+      }
+
+      setLoading(false);
+    }
+
+    // ── บันทึกคะแนน ───────────────────────────────────────
+    async function handleSave() {
+      const date    = inputDate.value;
+      const room_id = inputRoom.value;
+
+      // เก็บคะแนนจาก radio buttons
+      const scores = CONFIG.CRITERIA.map((_, i) => {
+        const checked = criteriaTbody.querySelector(`input[name="c${i}"]:checked`);
+        return checked ? parseInt(checked.value) : null;
+      });
+
+      // ตรวจว่ากรอกครบทุกหัวข้อ
+      if (scores.includes(null)) {
+        showAlert('กรุณากรอกคะแนนให้ครบทุกหัวข้อ (7 หัวข้อ)');
+        return;
+      }
+
+      hideAlert();
+      btnSave.disabled    = true;
+      btnSave.textContent = '💾 กำลังบันทึก...';
+
+      try {
+        const res = await API.saveScore(date, room_id, scores);
+
+        if (res.success) {
+          const action = res.action === 'updated' ? 'อัปเดต' : 'บันทึก';
+          showAlert(`✅ ${action}คะแนนสำเร็จ! ห้อง ${room_id} รวม ${res.total} / 21 คะแนน`, 'success');
+          // อัปเดต badge เป็นโหมดแก้ไข
+          modeBadge.textContent = `✏️ บันทึกแล้ว — คลิก "โหลดข้อมูล" อีกครั้งเพื่อแก้ไข`;
+          modeBadge.className   = 'alert alert-warning';
+        } else {
+          showAlert(res.message || 'บันทึกไม่สำเร็จ กรุณาลองใหม่');
+        }
+
+      } catch (err) {
+        showAlert('เชื่อมต่อ server ไม่ได้: ' + err.message);
+      }
+
+      btnSave.disabled    = false;
+      btnSave.textContent = '💾 บันทึกคะแนน';
+    }
+
+    // ── Utilities ─────────────────────────────────────────
+    function showAlert(message, type = 'danger') {
+      alertEl.textContent = message;
+      alertEl.className   = `alert alert-${type}`;
+      alertEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideAlert() {
+      alertEl.className = 'alert hidden';
+    }
+
+    function setLoading(loading) {
+      loadingEl.classList.toggle('hidden', !loading);
+      btnLoad.disabled = loading;
+    }
+
+    // ── Event listeners ───────────────────────────────────
+    btnLoad.addEventListener('click', handleLoad);
+    btnSave.addEventListener('click', handleSave);
+    btnReset.addEventListener('click', () => {
+      resetScores();
+      hideAlert();
+    });
+
+    // เมื่อเปลี่ยนวันหรือห้อง ซ่อนฟอร์มคะแนนก่อน
+    inputDate.addEventListener('change', () => {
+      scoreSection.classList.add('hidden');
+      hideAlert();
+    });
+    inputRoom.addEventListener('change', () => {
+      scoreSection.classList.add('hidden');
+      hideAlert();
+    });
+
+    // ── Init ──────────────────────────────────────────────
+    loadRooms();
+    buildCriteriaRows();
+
+  </script>
+
+</body>
+</html>
