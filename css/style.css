@@ -1,0 +1,533 @@
+/* ============================================================
+   style.css
+   ตกแต่งทุกหน้าของระบบห้องเรียนสะอาด
+   ============================================================ */
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary       : #2563eb;
+  --primary-dark  : #1d4ed8;
+  --primary-light : #eff6ff;
+  --success       : #16a34a;
+  --success-light : #f0fdf4;
+  --danger        : #dc2626;
+  --danger-light  : #fef2f2;
+  --warning       : #d97706;
+  --warning-light : #fffbeb;
+  --gray-50       : #f9fafb;
+  --gray-100      : #f3f4f6;
+  --gray-200      : #e5e7eb;
+  --gray-400      : #9ca3af;
+  --gray-600      : #4b5563;
+  --gray-800      : #1f2937;
+  --white         : #ffffff;
+  --radius        : 8px;
+  --radius-lg     : 12px;
+  --shadow        : 0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md     : 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --transition    : .2s ease;
+  --gold          : #f59e0b;
+  --gold-light    : #fffbeb;
+  --silver        : #6b7280;
+  --silver-light  : #f3f4f6;
+  --bronze        : #92400e;
+  --bronze-light  : #fef3c7;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  background : var(--gray-50);
+  color      : var(--gray-800);
+  min-height : 100vh;
+  line-height: 1.6;
+}
+
+/* ── Typography ───────────────────────────────────────────── */
+h1 { font-size: 1.75rem; font-weight: 700; }
+h2 { font-size: 1.375rem; font-weight: 700; }
+h3 { font-size: 1.125rem; font-weight: 600; }
+p  { color: var(--gray-600); }
+
+/* ── Layout ───────────────────────────────────────────────── */
+.container {
+  max-width : 900px;
+  margin    : 0 auto;
+  padding   : 0 1rem;
+}
+
+.container-sm {
+  max-width: 480px;
+  margin   : 0 auto;
+  padding  : 0 1rem;
+}
+
+/* ── Navbar ───────────────────────────────────────────────── */
+.navbar {
+  background   : var(--primary);
+  color        : var(--white);
+  padding      : .75rem 0;
+  box-shadow   : var(--shadow-md);
+  position     : sticky;
+  top          : 0;
+  z-index      : 100;
+}
+
+.navbar .container {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  font-size  : 1.125rem;
+  font-weight: 700;
+  color      : var(--white);
+  text-decoration: none;
+}
+
+.navbar-brand span {
+  font-size  : 1.25rem;
+  margin-right: .4rem;
+}
+
+.navbar-menu {
+  display    : flex;
+  align-items: center;
+  gap        : .5rem;
+}
+
+.navbar-user {
+  font-size: .875rem;
+  opacity  : .85;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn {
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : .375rem;
+  padding        : .5rem 1.25rem;
+  border-radius  : var(--radius);
+  border         : none;
+  font-size      : .9375rem;
+  font-family    : inherit;
+  font-weight    : 600;
+  cursor         : pointer;
+  transition     : background var(--transition), transform var(--transition);
+  text-decoration: none;
+  white-space    : nowrap;
+}
+
+.btn:active { transform: scale(.97); }
+
+.btn-primary {
+  background: var(--primary);
+  color     : var(--white);
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-success {
+  background: var(--success);
+  color     : var(--white);
+}
+.btn-success:hover { background: #15803d; }
+
+.btn-danger {
+  background: var(--danger);
+  color     : var(--white);
+}
+.btn-danger:hover { background: #b91c1c; }
+
+.btn-outline {
+  background: var(--white);
+  color     : var(--primary);
+  border    : 1.5px solid var(--primary);
+}
+.btn-outline:hover {
+  background: var(--primary-light);
+}
+
+.btn-ghost {
+  background: transparent;
+  color     : var(--white);
+  border    : 1.5px solid rgba(255,255,255,.6);
+}
+.btn-ghost:hover { background: rgba(255,255,255,.15); }
+
+.btn-sm {
+  padding  : .375rem .875rem;
+  font-size: .875rem;
+}
+
+.btn-full { width: 100%; }
+
+.btn:disabled {
+  opacity: .55;
+  cursor : not-allowed;
+  transform: none;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+.card {
+  background   : var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow   : var(--shadow);
+  padding      : 1.5rem;
+}
+
+.card-title {
+  font-size    : 1.125rem;
+  font-weight  : 700;
+  margin-bottom: 1rem;
+  padding-bottom: .625rem;
+  border-bottom: 2px solid var(--gray-100);
+}
+
+/* ── Form ─────────────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 1.125rem;
+}
+
+.form-label {
+  display      : block;
+  font-weight  : 600;
+  font-size    : .9375rem;
+  margin-bottom: .375rem;
+  color        : var(--gray-800);
+}
+
+.form-control {
+  width        : 100%;
+  padding      : .5625rem .875rem;
+  border       : 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size    : 1rem;
+  font-family  : inherit;
+  color        : var(--gray-800);
+  background   : var(--white);
+  transition   : border-color var(--transition), box-shadow var(--transition);
+  appearance   : none;
+}
+
+.form-control:focus {
+  outline     : none;
+  border-color: var(--primary);
+  box-shadow  : 0 0 0 3px rgba(37,99,235,.15);
+}
+
+select.form-control { cursor: pointer; }
+
+/* ── Score Input (หน้าคีย์คะแนน) ─────────────────────────── */
+.score-table {
+  width          : 100%;
+  border-collapse: collapse;
+  font-size      : .9375rem;
+}
+
+.score-table th,
+.score-table td {
+  padding: .625rem .75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.score-table th {
+  background : var(--gray-50);
+  font-weight: 600;
+  color      : var(--gray-600);
+  font-size  : .875rem;
+}
+
+.score-table tbody tr:last-child td { border-bottom: none; }
+
+.score-table tbody tr:hover { background: var(--gray-50); }
+
+/* Radio score buttons 0-3 */
+.score-options {
+  display: flex;
+  gap    : .375rem;
+}
+
+.score-options input[type="radio"] { display: none; }
+
+.score-options label {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 2.25rem;
+  height         : 2.25rem;
+  border-radius  : var(--radius);
+  border         : 1.5px solid var(--gray-200);
+  font-weight    : 700;
+  font-size      : 1rem;
+  cursor         : pointer;
+  transition     : all var(--transition);
+  color          : var(--gray-600);
+}
+
+.score-options input[type="radio"]:checked + label {
+  background  : var(--primary);
+  border-color: var(--primary);
+  color       : var(--white);
+}
+
+.score-options label:hover {
+  border-color: var(--primary);
+  color       : var(--primary);
+}
+
+.score-total-row td {
+  font-weight: 700;
+  font-size  : 1rem;
+  background : var(--primary-light) !important;
+  color      : var(--primary);
+}
+
+/* ── Alert / Toast ────────────────────────────────────────── */
+.alert {
+  padding      : .75rem 1rem;
+  border-radius: var(--radius);
+  font-size    : .9375rem;
+  font-weight  : 500;
+  margin-bottom: 1rem;
+}
+
+.alert-success {
+  background: var(--success-light);
+  color     : var(--success);
+  border    : 1px solid #bbf7d0;
+}
+
+.alert-danger {
+  background: var(--danger-light);
+  color     : var(--danger);
+  border    : 1px solid #fecaca;
+}
+
+.alert-warning {
+  background: var(--warning-light);
+  color     : var(--warning);
+  border    : 1px solid #fde68a;
+}
+
+/* ── Table (สรุปผล) ───────────────────────────────────────── */
+.report-table {
+  width          : 100%;
+  border-collapse: collapse;
+  font-size      : .9375rem;
+}
+
+.report-table th,
+.report-table td {
+  padding   : .625rem .875rem;
+  text-align: center;
+  border    : 1px solid var(--gray-200);
+}
+
+.report-table th {
+  background : var(--primary);
+  color      : var(--white);
+  font-weight: 600;
+  font-size  : .875rem;
+}
+
+.report-table th.col-left,
+.report-table td.col-left {
+  text-align: left;
+}
+
+.report-table tbody tr:nth-child(even) {
+  background: var(--gray-50);
+}
+
+.report-table tbody tr:hover {
+  background: var(--primary-light);
+}
+
+/* ── Medal badges ─────────────────────────────────────────── */
+.medal-badge {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : .25rem;
+  padding      : .25rem .625rem;
+  border-radius: 999px;
+  font-size    : .8125rem;
+  font-weight  : 700;
+}
+
+.medal-gold {
+  background: var(--gold-light);
+  color     : #92400e;
+  border    : 1px solid #fcd34d;
+}
+
+.medal-silver {
+  background: var(--silver-light);
+  color     : var(--silver);
+  border    : 1px solid var(--gray-200);
+}
+
+.medal-bronze {
+  background: var(--bronze-light);
+  color     : var(--bronze);
+  border    : 1px solid #fcd34d;
+}
+
+/* ── Passed / Failed badge ────────────────────────────────── */
+.badge-pass {
+  background: var(--success-light);
+  color     : var(--success);
+  border    : 1px solid #bbf7d0;
+  padding   : .2rem .6rem;
+  border-radius: 999px;
+  font-size : .8125rem;
+  font-weight: 600;
+}
+
+.badge-fail {
+  background: var(--danger-light);
+  color     : var(--danger);
+  border    : 1px solid #fecaca;
+  padding   : .2rem .6rem;
+  border-radius: 999px;
+  font-size : .8125rem;
+  font-weight: 600;
+}
+
+/* ── Loading spinner ──────────────────────────────────────── */
+.spinner-wrap {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  justify-content: center;
+  padding        : 3rem 0;
+  gap            : .75rem;
+  color          : var(--gray-400);
+}
+
+.spinner {
+  width        : 2rem;
+  height       : 2rem;
+  border       : 3px solid var(--gray-200);
+  border-top   : 3px solid var(--primary);
+  border-radius: 50%;
+  animation    : spin .7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Filter bar ───────────────────────────────────────────── */
+.filter-bar {
+  display   : flex;
+  flex-wrap : wrap;
+  gap       : .75rem;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+.filter-bar .form-group { margin-bottom: 0; }
+
+/* ── Summary stat boxes ───────────────────────────────────── */
+.stat-grid {
+  display              : grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap                  : .875rem;
+  margin-bottom        : 1.25rem;
+}
+
+.stat-box {
+  background   : var(--white);
+  border-radius: var(--radius);
+  padding      : 1rem;
+  text-align   : center;
+  box-shadow   : var(--shadow);
+  border-top   : 3px solid var(--gray-200);
+}
+
+.stat-box.gold   { border-top-color: var(--gold); }
+.stat-box.silver { border-top-color: var(--silver); }
+.stat-box.bronze { border-top-color: #cd7f32; }
+
+.stat-box-number {
+  font-size  : 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-box-label {
+  font-size : .875rem;
+  color     : var(--gray-600);
+  margin-top: .25rem;
+}
+
+/* ── Page hero (หน้าหลัก) ─────────────────────────────────── */
+.hero {
+  background   : linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+  color        : var(--white);
+  padding      : 3rem 0;
+  text-align   : center;
+  margin-bottom: 2rem;
+}
+
+.hero h1 { font-size: 2rem; margin-bottom: .5rem; }
+.hero p  { color: rgba(255,255,255,.85); font-size: 1.0625rem; }
+
+.hero-actions {
+  display        : flex;
+  justify-content: center;
+  gap            : 1rem;
+  margin-top     : 1.5rem;
+  flex-wrap      : wrap;
+}
+
+/* ── Utility ──────────────────────────────────────────────── */
+.mt-1 { margin-top: .25rem; }
+.mt-2 { margin-top: .5rem; }
+.mt-3 { margin-top: .75rem; }
+.mt-4 { margin-top: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+.text-muted  { color: var(--gray-400); font-size: .875rem; }
+.text-success { color: var(--success); }
+.text-danger  { color: var(--danger); }
+.hidden { display: none !important; }
+.flex   { display: flex; }
+.gap-2  { gap: .5rem; }
+.gap-3  { gap: .75rem; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+  h1 { font-size: 1.5rem; }
+  .hero h1 { font-size: 1.625rem; }
+  .hero { padding: 2rem 0; }
+
+  .score-table th:nth-child(1),
+  .score-table td:nth-child(1) {
+    font-size: .875rem;
+  }
+
+  .filter-bar { flex-direction: column; }
+  .filter-bar .form-group,
+  .filter-bar .btn { width: 100%; }
+
+  .stat-grid { grid-template-columns: repeat(3, 1fr); }
+
+  .report-table { font-size: .8125rem; }
+  .report-table th,
+  .report-table td { padding: .5rem .5rem; }
+}
