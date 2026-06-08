@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เข้าสู่ระบบ — ห้องเรียนสะอาด</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* จัดหน้า login ให้อยู่กลางหน้าจอ */
+    .login-wrap {
+      min-height    : calc(100vh - 56px);
+      display       : flex;
+      align-items   : center;
+      justify-content: center;
+      padding       : 2rem 1rem;
+    }
+    .login-card {
+      width        : 100%;
+      max-width    : 420px;
+      background   : var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow   : var(--shadow-md);
+      padding      : 2rem;
+    }
+    .login-header {
+      text-align   : center;
+      margin-bottom: 1.75rem;
+    }
+    .login-header .icon {
+      font-size    : 2.75rem;
+      margin-bottom: .5rem;
+      display      : block;
+    }
+    .login-header h2 {
+      margin-bottom: .25rem;
+    }
+    .login-header p {
+      font-size: .9375rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <span>🏫</span>ห้องเรียนสะอาด
+      </a>
+      <div class="navbar-menu">
+        <a href="report.html" class="btn btn-ghost btn-sm">ดูผลการตรวจ</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Login Card ──────────────────────────────────────── -->
+  <div class="login-wrap">
+    <div class="login-card">
+
+      <div class="login-header">
+        <span class="icon">🔐</span>
+        <h2>เด็กสภาเข้าสู่ระบบ</h2>
+        <p>สำหรับผู้ตรวจห้องเรียนเท่านั้น</p>
+      </div>
+
+      <!-- Alert -->
+      <div id="alert" class="alert hidden"></div>
+
+      <!-- Form -->
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input
+          type        = "text"
+          id          = "username"
+          class       = "form-control"
+          placeholder = "กรอก username"
+          autocomplete= "username"
+          autofocus
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input
+          type        = "password"
+          id          = "password"
+          class       = "form-control"
+          placeholder = "กรอก password"
+          autocomplete= "current-password"
+        />
+      </div>
+
+      <button class="btn btn-primary btn-full mt-3" id="btn-login">
+        เข้าสู่ระบบ
+      </button>
+
+      <p class="text-center text-muted mt-4">
+        <a href="index.html" style="color: var(--primary);">← กลับหน้าหลัก</a>
+      </p>
+
+    </div>
+  </div>
+
+  <!-- ── Scripts ─────────────────────────────────────────── -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // ถ้า login อยู่แล้ว → ไป input.html ทันที
+    requireGuest();
+
+    // ── Elements ──────────────────────────────────────────
+    const usernameEl = document.getElementById('username');
+    const passwordEl = document.getElementById('password');
+    const btnLogin   = document.getElementById('btn-login');
+    const alertEl    = document.getElementById('alert');
+
+    // ── showAlert ─────────────────────────────────────────
+    function showAlert(message, type = 'danger') {
+      alertEl.textContent = message;
+      alertEl.className   = `alert alert-${type}`;
+    }
+
+    function hideAlert() {
+      alertEl.className = 'alert hidden';
+    }
+
+    // ── setLoading ─────────────────────────────────────────
+    function setLoading(loading) {
+      btnLogin.disabled    = loading;
+      btnLogin.textContent = loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ';
+    }
+
+    // ── handleLogin ───────────────────────────────────────
+    async function handleLogin() {
+      hideAlert();
+
+      const username = usernameEl.value.trim();
+      const password = passwordEl.value.trim();
+
+      if (!username || !password) {
+        showAlert('กรุณากรอก Username และ Password');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await API.login(username, password);
+
+        if (res.success) {
+          // บันทึก session แล้วไปหน้าคีย์คะแนน
+          saveSession(res.token, res.inspector_id, res.display_name);
+          navigate(CONFIG.PAGES.INPUT);
+        } else {
+          showAlert(res.message || 'Username หรือ Password ไม่ถูกต้อง');
+          passwordEl.value = '';
+          passwordEl.focus();
+        }
+
+      } catch (err) {
+        showAlert('เชื่อมต่อ server ไม่ได้ กรุณาลองใหม่อีกครั้ง');
+      }
+
+      setLoading(false);
+    }
+
+    // ── Event listeners ───────────────────────────────────
+    btnLogin.addEventListener('click', handleLogin);
+
+    // กด Enter ที่ช่องไหนก็ login ได้เลย
+    usernameEl.addEventListener('keydown', e => { if (e.key === 'Enter') passwordEl.focus(); });
+    passwordEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  </script>
+
+</body>
+</html>
