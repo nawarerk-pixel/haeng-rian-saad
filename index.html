@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ห้องเรียนสะอาด</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <span>🏫</span>ห้องเรียนสะอาด
+      </a>
+      <div class="navbar-menu">
+        <a href="report.html" class="btn btn-ghost btn-sm">ดูผลการตรวจ</a>
+        <a href="login.html" class="btn btn-ghost btn-sm" id="btn-inspector">เด็กสภา</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="container">
+      <h1>🏆 ระบบห้องเรียนสะอาด</h1>
+      <p>ตรวจสอบผลคะแนนความสะอาดห้องเรียนของคุณได้ที่นี่</p>
+      <div class="hero-actions">
+        <a href="report.html" class="btn btn-outline">📊 ดูผลการตรวจ</a>
+        <a href="login.html" class="btn btn-ghost" id="hero-btn-inspector">🔐 เด็กสภาเข้าระบบ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Content ────────────────────────────────────────── -->
+  <main class="container" style="padding-bottom: 3rem;">
+
+    <!-- เกณฑ์การตรวจ -->
+    <div class="card mb-6">
+      <div class="card-title">📋 เกณฑ์การให้คะแนน</div>
+      <p style="margin-bottom: 1rem;">
+        ห้องเรียนแต่ละห้องจะถูกตรวจ <strong>7 หัวข้อ</strong>
+        หัวข้อละ <strong>0–3 คะแนน</strong> รวมสูงสุด <strong>21 คะแนน</strong>
+      </p>
+      <div style="overflow-x: auto;">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th class="col-left">หัวข้อ</th>
+              <th>3 คะแนน</th>
+              <th>2 คะแนน</th>
+              <th>1 คะแนน</th>
+              <th>0 คะแนน</th>
+            </tr>
+          </thead>
+          <tbody id="criteria-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- เกณฑ์เหรียญ -->
+    <div class="card mb-6">
+      <div class="card-title">🏅 เกณฑ์การมอบเหรียญรางวัล</div>
+      <p style="margin-bottom: 1rem;">
+        คำนวณจาก <strong>% ของวันที่ได้คะแนน ≥ 18 คะแนน</strong>
+        เทียบกับจำนวนวันที่ถูกตรวจในเดือนนั้น
+      </p>
+      <div class="stat-grid">
+        <div class="stat-box gold">
+          <div class="stat-box-number">🥇</div>
+          <div class="stat-box-label" style="font-weight:700; color:#92400e;">เหรียญทอง</div>
+          <div class="stat-box-label">≥ 80% ของวันตรวจ</div>
+        </div>
+        <div class="stat-box silver">
+          <div class="stat-box-number">🥈</div>
+          <div class="stat-box-label" style="font-weight:700; color:#4b5563;">เหรียญเงิน</div>
+          <div class="stat-box-label">60–79% ของวันตรวจ</div>
+        </div>
+        <div class="stat-box bronze">
+          <div class="stat-box-number">🥉</div>
+          <div class="stat-box-label" style="font-weight:700; color:#92400e;">เหรียญทองแดง</div>
+          <div class="stat-box-label">40–59% ของวันตรวจ</div>
+        </div>
+      </div>
+      <p class="text-muted mt-2">
+        * เหรียญทองเท่านั้นที่จะได้รับรางวัลมอบหน้าโดม
+        เหรียญเงินและทองแดงแสดงเพื่อให้ทราบระดับความสะอาดของห้อง
+      </p>
+    </div>
+
+    <!-- ลิงก์ด่วน -->
+    <div class="card">
+      <div class="card-title">🔗 เมนูด่วน</div>
+      <div style="display: flex; flex-wrap: wrap; gap: .75rem;">
+        <a href="report.html?view=daily" class="btn btn-outline">
+          📅 ดูผลรายวัน
+        </a>
+        <a href="report.html?view=monthly" class="btn btn-outline">
+          📆 ดูผลรายเดือน
+        </a>
+        <a href="report.html?view=term" class="btn btn-outline">
+          📚 ดูผลรายภาคเรียน
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Scripts ─────────────────────────────────────────── -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // ── แสดงหัวข้อการตรวจในตาราง ────────────────────────
+    const tbody = document.getElementById('criteria-table-body');
+    CONFIG.CRITERIA.forEach((label, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="col-left"><strong>${i + 1}.</strong> ${label}</td>
+        <td>ดีมาก</td>
+        <td>ดี</td>
+        <td>พอใช้</td>
+        <td>ต้องปรับปรุง</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // ── ถ้า login อยู่แล้ว เปลี่ยนปุ่มเป็น "คีย์คะแนน" ─
+    if (isLoggedIn()) {
+      const session = getSession();
+      document.getElementById('btn-inspector').textContent    = '📝 คีย์คะแนน';
+      document.getElementById('btn-inspector').href           = 'input.html';
+      document.getElementById('hero-btn-inspector').textContent = `📝 คีย์คะแนน (${session.display_name})`;
+      document.getElementById('hero-btn-inspector').href       = 'input.html';
+    }
+  </script>
+
+</body>
+</html>
