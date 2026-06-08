@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>สรุปผลการตรวจ — ห้องเรียนสะอาด</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .tab-bar {
+      display        : flex;
+      gap            : .5rem;
+      margin-bottom  : 1.25rem;
+      border-bottom  : 2px solid var(--gray-200);
+      padding-bottom : .5rem;
+      flex-wrap      : wrap;
+    }
+    .tab-btn {
+      padding      : .5rem 1.125rem;
+      border-radius: var(--radius);
+      border       : 1.5px solid var(--gray-200);
+      background   : var(--white);
+      font-family  : inherit;
+      font-size    : .9375rem;
+      font-weight  : 600;
+      cursor       : pointer;
+      color        : var(--gray-600);
+      transition   : all var(--transition);
+    }
+    .tab-btn:hover  { border-color: var(--primary); color: var(--primary); }
+    .tab-btn.active {
+      background   : var(--primary);
+      border-color : var(--primary);
+      color        : var(--white);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .building-header {
+      background   : var(--primary-light);
+      color        : var(--primary);
+      font-weight  : 700;
+      padding      : .5rem .875rem;
+      border-radius: var(--radius);
+      margin       : 1rem 0 .5rem;
+      font-size    : .9375rem;
+    }
+    .no-data {
+      text-align : center;
+      padding    : 2.5rem 0;
+      color      : var(--gray-400);
+      font-size  : 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <span>🏫</span>ห้องเรียนสะอาด
+      </a>
+      <div class="navbar-menu" id="navbar-menu">
+        <a href="login.html" class="btn btn-ghost btn-sm" id="btn-inspector">เด็กสภา</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main ───────────────────────────────────────────── -->
+  <main class="container" style="padding: 1.5rem 1rem 3rem;">
+
+    <h2 style="margin-bottom: 1.25rem;">📊 สรุปผลการตรวจ</h2>
+
+    <!-- ── Tab Bar ──────────────────────────────────────── -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="daily">📅 รายวัน</button>
+      <button class="tab-btn" data-tab="monthly">📆 รายเดือน</button>
+      <button class="tab-btn" data-tab="term">📚 รายภาคเรียน</button>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         Tab 1 — รายวัน
+    ════════════════════════════════════════════════════ -->
+    <div class="tab-panel active" id="panel-daily">
+      <div class="card">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label class="form-label" for="daily-date">เลือกวันที่</label>
+            <input type="date" id="daily-date" class="form-control" />
+          </div>
+          <button class="btn btn-primary" id="btn-daily-load">ดูผล</button>
+        </div>
+
+        <div id="daily-result">
+          <p class="text-muted">เลือกวันที่แล้วกด "ดูผล"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         Tab 2 — รายเดือน
+    ════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-monthly">
+      <div class="card">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label class="form-label" for="monthly-month">เลือกเดือน</label>
+            <input type="month" id="monthly-month" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="monthly-level">ระดับชั้น</label>
+            <select id="monthly-level" class="form-control">
+              <option value="">ทั้งหมด</option>
+              <option value="ม.ต้น">ม.ต้น</option>
+              <option value="ม.ปลาย">ม.ปลาย</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-monthly-load">ดูผล</button>
+        </div>
+
+        <div id="monthly-result">
+          <p class="text-muted">เลือกเดือนแล้วกด "ดูผล"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         Tab 3 — รายภาคเรียน
+    ════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-term">
+      <div class="card">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label class="form-label" for="term-select">เลือกภาคเรียน</label>
+            <select id="term-select" class="form-control">
+              <option value="">— เลือกภาคเรียน —</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-term-load">ดูผล</button>
+        </div>
+
+        <div id="term-result">
+          <p class="text-muted">เลือกภาคเรียนแล้วกด "ดูผล"</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Scripts ─────────────────────────────────────────── -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // ── ตั้งค่าเริ่มต้น ────────────────────────────────────
+
+    // วันนี้
+    const today = new Date();
+    const yyyy  = today.getFullYear();
+    const mm    = String(today.getMonth() + 1).padStart(2, '0');
+    const dd    = String(today.getDate()).padStart(2, '0');
+    document.getElementById('daily-date').value   = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('monthly-month').value = `${yyyy}-${mm}`;
+
+    // สร้าง dropdown ภาคเรียน ย้อนหลัง 4 ภาค
+    const termSelect = document.getElementById('term-select');
+    for (let y = yyyy; y >= yyyy - 1; y--) {
+      ['T1', 'T2'].forEach(t => {
+        const opt = document.createElement('option');
+        opt.value       = `${y}-${t}`;
+        opt.textContent = `ภาคเรียนที่ ${t === 'T1' ? 1 : 2} ปีการศึกษา ${y}`;
+        termSelect.appendChild(opt);
+      });
+    }
+
+    // ถ้า login อยู่ → เปลี่ยนปุ่มเป็น "คีย์คะแนน"
+    if (isLoggedIn()) {
+      const s = getSession();
+      const menu = document.getElementById('navbar-menu');
+      menu.innerHTML = `
+        <span class="navbar-user">${s.display_name}</span>
+        <a href="input.html" class="btn btn-ghost btn-sm">📝 คีย์คะแนน</a>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">ออกจากระบบ</button>
+      `;
+    }
+
+    // ── Tab switching ──────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`panel-${btn.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // กดจาก URL query string ?view=daily|monthly|term
+    const urlView = new URLSearchParams(window.location.search).get('view');
+    if (urlView) {
+      const targetBtn = document.querySelector(`.tab-btn[data-tab="${urlView}"]`);
+      if (targetBtn) targetBtn.click();
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  Tab 1 — รายวัน
+    // ════════════════════════════════════════════════════════
+    document.getElementById('btn-daily-load').addEventListener('click', async () => {
+      const date = document.getElementById('daily-date').value;
+      if (!date) { alert('กรุณาเลือกวันที่'); return; }
+
+      const resultEl = document.getElementById('daily-result');
+      resultEl.innerHTML = loadingHTML();
+
+      try {
+        const res = await API.getDailyReport(date);
+        if (!res.success) { resultEl.innerHTML = errorHTML(res.message); return; }
+        if (!res.rooms || res.rooms.length === 0) {
+          resultEl.innerHTML = noDataHTML('ไม่พบข้อมูลการตรวจในวันที่เลือก');
+          return;
+        }
+        resultEl.innerHTML = renderDailyTable(res.rooms, date);
+      } catch (err) {
+        resultEl.innerHTML = errorHTML(err.message);
+      }
+    });
+
+    function renderDailyTable(rooms, date) {
+      // จัดกลุ่มตาม building
+      const grouped = {};
+      rooms.forEach(r => {
+        if (!grouped[r.building]) grouped[r.building] = [];
+        grouped[r.building].push(r);
+      });
+
+      // นับสถิติ
+      const total  = rooms.length;
+      const passed = rooms.filter(r => r.passed).length;
+
+      let html = `
+        <div class="flex items-center justify-between mb-4" style="flex-wrap:wrap; gap:.5rem;">
+          <div>
+            <strong>วันที่ ${date}</strong>
+            <span class="text-muted" style="margin-left:.5rem;">ตรวจทั้งหมด ${total} ห้อง</span>
+          </div>
+          <div>
+            <span class="badge-pass">✅ ผ่าน ${passed} ห้อง</span>
+            &nbsp;
+            <span class="badge-fail">❌ ไม่ผ่าน ${total - passed} ห้อง</span>
+          </div>
+        </div>
+      `;
+
+      Object.keys(grouped).sort().forEach(building => {
+        html += `<div class="building-header">🏢 ${building}</div>`;
+        html += `
+          <div style="overflow-x:auto; margin-bottom:.5rem;">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th class="col-left">ห้อง</th>
+                  <th class="col-left">ระดับชั้น</th>
+                  ${CONFIG.CRITERIA.map((_, i) => `<th>ข้อ ${i+1}</th>`).join('')}
+                  <th>รวม</th>
+                  <th>ผล</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        grouped[building].forEach(r => {
+          html += `
+            <tr>
+              <td class="col-left"><strong>${r.room_id}</strong></td>
+              <td class="col-left">${r.homeroom || '-'}</td>
+              ${r.scores.map(s => `<td>${s}</td>`).join('')}
+              <td><strong>${r.total}</strong></td>
+              <td>${r.passed
+                ? '<span class="badge-pass">✅ ผ่าน</span>'
+                : '<span class="badge-fail">❌ ไม่ผ่าน</span>'
+              }</td>
+            </tr>
+          `;
+        });
+        html += `</tbody></table></div>`;
+      });
+
+      return html;
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  Tab 2 — รายเดือน
+    // ════════════════════════════════════════════════════════
+    document.getElementById('btn-monthly-load').addEventListener('click', async () => {
+      const yearMonth  = document.getElementById('monthly-month').value;
+      const classLevel = document.getElementById('monthly-level').value;
+      if (!yearMonth) { alert('กรุณาเลือกเดือน'); return; }
+
+      const resultEl = document.getElementById('monthly-result');
+      resultEl.innerHTML = loadingHTML();
+
+      try {
+        const res = await API.getMonthlyReport(yearMonth, classLevel);
+        if (!res.success) { resultEl.innerHTML = errorHTML(res.message); return; }
+        if (!res.rooms || res.rooms.length === 0) {
+          resultEl.innerHTML = noDataHTML('ไม่พบข้อมูลในเดือนที่เลือก');
+          return;
+        }
+        resultEl.innerHTML = renderMonthlyReport(res, yearMonth);
+      } catch (err) {
+        resultEl.innerHTML = errorHTML(err.message);
+      }
+    });
+
+    function renderMonthlyReport(res, yearMonth) {
+      const { summary, rooms } = res;
+
+      // stat boxes
+      let html = `
+        <p style="margin-bottom:.875rem;">
+          <strong>เดือน ${yearMonth}</strong>
+          <span class="text-muted" style="margin-left:.5rem;">ห้องที่มีข้อมูล ${rooms.length} ห้อง</span>
+        </p>
+        <div class="stat-grid" style="margin-bottom:1.25rem;">
+          <div class="stat-box gold">
+            <div class="stat-box-number">🥇</div>
+            <div class="stat-box-label" style="font-weight:700;color:#92400e;">เหรียญทอง</div>
+            <div class="stat-box-number">${summary.gold.total}</div>
+            <div class="stat-box-label">ห้อง</div>
+          </div>
+          <div class="stat-box silver">
+            <div class="stat-box-number">🥈</div>
+            <div class="stat-box-label" style="font-weight:700;color:#4b5563;">เหรียญเงิน</div>
+            <div class="stat-box-number">${summary.silver.total}</div>
+            <div class="stat-box-label">ห้อง</div>
+          </div>
+          <div class="stat-box bronze">
+            <div class="stat-box-number">🥉</div>
+            <div class="stat-box-label" style="font-weight:700;color:#92400e;">เหรียญทองแดง</div>
+            <div class="stat-box-number">${summary.bronze.total}</div>
+            <div class="stat-box-label">ห้อง</div>
+          </div>
+        </div>
+      `;
+
+      // ตารางสรุปเหรียญแยกระดับชั้น
+      const allLevels = ['ม.1','ม.2','ม.3','ม.4','ม.5','ม.6'];
+      html += `
+        <div style="overflow-x:auto; margin-bottom:1.25rem;">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th class="col-left">เหรียญ</th>
+                ${allLevels.map(l => `<th>${l}</th>`).join('')}
+                <th>รวม</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${['gold','silver','bronze'].map(medal => `
+                <tr>
+                  <td class="col-left">
+                    <span class="medal-badge ${CONFIG.MEDAL_CLASS[medal]}">
+                      ${CONFIG.MEDAL_LABEL[medal]}
+                    </span>
+                  </td>
+                  ${allLevels.map(l => `<td>${summary[medal].by_level[l] || 0}</td>`).join('')}
+                  <td><strong>${summary[medal].total}</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // ตารางรายห้อง จัดกลุ่มตาม building
+      const grouped = {};
+      rooms.forEach(r => {
+        if (!grouped[r.building]) grouped[r.building] = [];
+        grouped[r.building].push(r);
+      });
+
+      html += `<h3 style="margin-bottom:.75rem;">รายละเอียดแต่ละห้อง</h3>`;
+      Object.keys(grouped).sort().forEach(building => {
+        html += `<div class="building-header">🏢 ${building}</div>`;
+        html += `
+          <div style="overflow-x:auto; margin-bottom:.5rem;">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th class="col-left">ห้อง</th>
+                  <th class="col-left">ระดับชั้น</th>
+                  <th>วันตรวจ</th>
+                  <th>วันดี</th>
+                  <th>%</th>
+                  <th>เหรียญ</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        grouped[building].forEach(r => {
+          html += `
+            <tr>
+              <td class="col-left"><strong>${r.room_id}</strong></td>
+              <td class="col-left">${r.homeroom || '-'}</td>
+              <td>${r.total_days}</td>
+              <td>${r.good_days}</td>
+              <td>${r.pct}%</td>
+              <td>
+                ${r.medal !== 'none'
+                  ? `<span class="medal-badge ${CONFIG.MEDAL_CLASS[r.medal]}">${CONFIG.MEDAL_LABEL[r.medal]}</span>`
+                  : '<span class="text-muted">—</span>'
+                }
+              </td>
+            </tr>
+          `;
+        });
+        html += `</tbody></table></div>`;
+      });
+
+      return html;
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  Tab 3 — รายภาคเรียน
+    // ════════════════════════════════════════════════════════
+    document.getElementById('btn-term-load').addEventListener('click', async () => {
+      const term = document.getElementById('term-select').value;
+      if (!term) { alert('กรุณาเลือกภาคเรียน'); return; }
+
+      const resultEl = document.getElementById('term-result');
+      resultEl.innerHTML = loadingHTML();
+
+      try {
+        const res = await API.getTermReport(term);
+        if (!res.success) { resultEl.innerHTML = errorHTML(res.message); return; }
+        if (!res.rows || res.rows.length === 0) {
+          resultEl.innerHTML = noDataHTML('ไม่พบข้อมูลในภาคเรียนที่เลือก');
+          return;
+        }
+        resultEl.innerHTML = renderTermReport(res, term);
+      } catch (err) {
+        resultEl.innerHTML = errorHTML(err.message);
+      }
+    });
+
+    function renderTermReport(res, term) {
+      const termLabel = term.replace('-T1', ' ภาคเรียนที่ 1').replace('-T2', ' ภาคเรียนที่ 2');
+
+      let html = `
+        <p style="margin-bottom:1rem;">
+          <strong>ปีการศึกษา ${termLabel}</strong>
+        </p>
+        <div style="overflow-x:auto;">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th class="col-left">ระดับชั้น</th>
+                <th>🥇 เหรียญทอง</th>
+                <th>🥈 เหรียญเงิน</th>
+                <th>🥉 เหรียญทองแดง</th>
+                <th>รวมทั้งหมด</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      let totalGold = 0, totalSilver = 0, totalBronze = 0;
+      res.rows.forEach(r => {
+        totalGold   += r.gold;
+        totalSilver += r.silver;
+        totalBronze += r.bronze;
+        html += `
+          <tr>
+            <td class="col-left"><strong>${r.class_level}</strong></td>
+            <td>${r.gold   > 0 ? `<strong style="color:var(--gold)">${r.gold}</strong>`   : '—'}</td>
+            <td>${r.silver > 0 ? `<strong style="color:var(--silver)">${r.silver}</strong>` : '—'}</td>
+            <td>${r.bronze > 0 ? `<strong style="color:var(--bronze)">${r.bronze}</strong>` : '—'}</td>
+            <td><strong>${r.gold + r.silver + r.bronze}</strong></td>
+          </tr>
+        `;
+      });
+
+      html += `
+            </tbody>
+            <tfoot>
+              <tr style="background:var(--primary-light); font-weight:700;">
+                <td class="col-left">รวมทั้งหมด</td>
+                <td>${totalGold}</td>
+                <td>${totalSilver}</td>
+                <td>${totalBronze}</td>
+                <td>${totalGold + totalSilver + totalBronze}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      `;
+
+      return html;
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  Helper HTML snippets
+    // ════════════════════════════════════════════════════════
+    function loadingHTML() {
+      return `
+        <div class="spinner-wrap">
+          <div class="spinner"></div>
+          <span>กำลังโหลดข้อมูล...</span>
+        </div>
+      `;
+    }
+
+    function errorHTML(msg) {
+      return `<div class="alert alert-danger">❌ เกิดข้อผิดพลาด: ${msg}</div>`;
+    }
+
+    function noDataHTML(msg) {
+      return `<div class="no-data">📭 ${msg}</div>`;
+    }
+
+  </script>
+
+</body>
+</html>
