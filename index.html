@@ -131,10 +131,70 @@
     // ── ถ้า login อยู่แล้ว เปลี่ยนปุ่มเป็น "คีย์คะแนน" ─
     if (isLoggedIn()) {
       const session = getSession();
-      document.getElementById('btn-inspector').textContent    = '📝 คีย์คะแนน';
-      document.getElementById('btn-inspector').href           = 'input.html';
+      document.getElementById('btn-inspector').textContent      = '📝 คีย์คะแนน';
+      document.getElementById('btn-inspector').href             = 'input.html';
       document.getElementById('hero-btn-inspector').textContent = `📝 คีย์คะแนน (${session.display_name})`;
-      document.getElementById('hero-btn-inspector').href       = 'input.html';
+      document.getElementById('hero-btn-inspector').href        = 'input.html';
+    }
+
+    // ── ถ้าเป็น admin เพิ่มปุ่มเปิด/ปิดระบบ ─────────────
+    if (isAdmin()) {
+      const adminBar = document.createElement('div');
+      adminBar.className = 'card mb-6';
+      adminBar.style.borderLeft = '4px solid var(--primary)';
+      adminBar.innerHTML = `
+        <div class="card-title">⚙️ จัดการระบบ (Admin)</div>
+        <div class="flex items-center gap-3" style="flex-wrap:wrap;">
+          <div id="system-status" class="text-muted">กำลังตรวจสอบสถานะ...</div>
+          <button class="btn btn-outline" id="btn-toggle-system">⏳ โหลด...</button>
+        </div>
+        <p class="text-muted mt-2" style="font-size:.875rem;">
+          เมื่อปิดระบบ เด็กสภาจะไม่สามารถคีย์คะแนนได้ แต่ทุกคนยังดูผลได้ตามปกติ
+        </p>
+      `;
+      // แทรกก่อน card เกณฑ์การตรวจ
+      const mainEl = document.querySelector('main .container') || document.querySelector('main');
+      mainEl.insertBefore(adminBar, mainEl.firstChild);
+
+      // โหลดสถานะปัจจุบัน
+      async function loadSystemStatus() {
+        const res = await API.getSystemStatus();
+        updateSystemUI(res.system_open);
+      }
+
+      function updateSystemUI(isOpen) {
+        const statusEl = document.getElementById('system-status');
+        const btnEl    = document.getElementById('btn-toggle-system');
+        if (isOpen) {
+          statusEl.innerHTML = '<span class="badge-pass">✅ ระบบเปิดอยู่</span>';
+          btnEl.textContent  = '🔒 ปิดการคีย์คะแนน';
+          btnEl.className    = 'btn btn-danger';
+        } else {
+          statusEl.innerHTML = '<span class="badge-fail">🔒 ระบบปิดอยู่</span>';
+          btnEl.textContent  = '🔓 เปิดการคีย์คะแนน';
+          btnEl.className    = 'btn btn-success';
+        }
+      }
+
+      document.getElementById('btn-toggle-system').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-toggle-system');
+        btn.disabled    = true;
+        btn.textContent = '⏳ กำลังดำเนินการ...';
+        try {
+          const res = await API.toggleSystem();
+          if (res.success) {
+            updateSystemUI(res.system_open);
+          } else {
+            alert('เกิดข้อผิดพลาด: ' + res.message);
+            btn.disabled = false;
+          }
+        } catch (err) {
+          alert('เชื่อมต่อ server ไม่ได้');
+          btn.disabled = false;
+        }
+      });
+
+      loadSystemStatus();
     }
   </script>
 
