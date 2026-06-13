@@ -153,7 +153,7 @@
 
         if (res.success) {
           // บันทึก session แล้วไปหน้าคีย์คะแนน
-          saveSession(res.token, res.inspector_id, res.display_name);
+          saveSession(res.token, res.inspector_id, res.display_name, res.role);
           navigate(CONFIG.PAGES.INPUT);
         } else {
           showAlert(res.message || 'Username หรือ Password ไม่ถูกต้อง');
