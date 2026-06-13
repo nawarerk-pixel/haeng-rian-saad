@@ -126,6 +126,34 @@ const API = {
   // ============================================================
   async getTermReport(term) {
     return await this.get({ action: 'getTermReport', term });
+  },
+
+  // ============================================================
+  //  API.getSystemStatus()
+  //  ดึงสถานะเปิด/ปิดระบบ
+  // ============================================================
+  async getSystemStatus() {
+    return await this.get({ action: 'getSystemStatus' });
+  },
+
+  // ============================================================
+  //  API.toggleSystem()
+  //  เปิด/ปิดระบบ (admin เท่านั้น)
+  // ============================================================
+  async toggleSystem() {
+    const session = getSession();
+    if (!session) throw new Error('ไม่พบ session กรุณา Login ใหม่');
+    return await this.post({ action: 'toggleSystem', token: session.token });
+  },
+
+  // ============================================================
+  //  API.getScoreLogs(room_id, date)
+  //  ดึงประวัติการแก้ไขคะแนน (admin เท่านั้น)
+  // ============================================================
+  async getScoreLogs(room_id, date) {
+    const session = getSession();
+    if (!session) throw new Error('ไม่พบ session กรุณา Login ใหม่');
+    return await this.get({ action: 'getScoreLogs', room_id, date, token: session.token });
   }
 
 };
