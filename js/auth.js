@@ -18,9 +18,16 @@ const SESSION_KEY = 'haeng_rian_session';
 //  saveSession(token, inspector_id, display_name)
 //  เก็บข้อมูล session หลัง login สำเร็จ
 // ============================================================
-function saveSession(token, inspector_id, display_name) {
-  const session = { token, inspector_id, display_name };
+function saveSession(token, inspector_id, display_name, role) {
+  const session = { token, inspector_id, display_name, role: role || 'inspector' };
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+// ── isAdmin() ──────────────────────────────────────────────
+// ตรวจว่า user ที่ login อยู่เป็น admin ไหม
+function isAdmin() {
+  const session = getSession();
+  return session && session.role === 'admin';
 }
 
 // ============================================================
