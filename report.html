@@ -52,6 +52,57 @@
       color      : var(--gray-400);
       font-size  : 1rem;
     }
+    /* ── Popup Modal ──────────────────────────────────────── */
+    .modal-overlay {
+      display        : none;
+      position       : fixed;
+      inset          : 0;
+      background     : rgba(0,0,0,.45);
+      z-index        : 200;
+      align-items    : center;
+      justify-content: center;
+      padding        : 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background   : var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow   : var(--shadow-md);
+      width        : 100%;
+      max-width    : 560px;
+      max-height   : 80vh;
+      overflow-y   : auto;
+      padding      : 1.5rem;
+    }
+    .modal-header {
+      display        : flex;
+      align-items    : center;
+      justify-content: space-between;
+      margin-bottom  : 1rem;
+      padding-bottom : .75rem;
+      border-bottom  : 2px solid var(--gray-100);
+    }
+    .modal-close {
+      background : none;
+      border     : none;
+      font-size  : 1.25rem;
+      cursor     : pointer;
+      color      : var(--gray-400);
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--danger); }
+    /* badge มีการแก้ไข */
+    .edited-badge {
+      display      : inline-flex;
+      align-items  : center;
+      gap          : .2rem;
+      font-size    : .75rem;
+      color        : var(--warning);
+      cursor       : pointer;
+      margin-left  : .375rem;
+      vertical-align: middle;
+    }
+    .edited-badge:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -63,7 +114,6 @@
         <span>🏫</span>ห้องเรียนสะอาด
       </a>
       <div class="navbar-menu" id="navbar-menu">
-        <a href="index.html" class="btn btn-ghost btn-sm">หน้าหลัก</a>
         <a href="login.html" class="btn btn-ghost btn-sm" id="btn-inspector">เด็กสภา</a>
       </div>
     </div>
@@ -149,6 +199,19 @@
     </div>
 
   </main>
+
+  <!-- ── Popup Modal (log การแก้ไข) ────────────────────────── -->
+  <div class="modal-overlay" id="log-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title">ประวัติการแก้ไข</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div id="modal-body">
+        <div class="spinner-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
 
   <!-- ── Scripts ─────────────────────────────────────────── -->
   <script src="js/config.js"></script>
@@ -270,9 +333,19 @@
               <tbody>
         `;
         grouped[building].forEach(r => {
+          // badge ✏️ แสดงทุกคน ถ้ามีการแก้ไข
+          const editedBadge = r.edited
+            ? `<span class="edited-badge" data-room="${r.room_id}" data-date="${date}">✏️ แก้ไข</span>`
+            : '';
+          // ถ้าเป็น admin ให้ badge กดได้ → เปิด popup
+          const editedCell = r.edited
+            ? (isAdmin()
+                ? `<span class="edited-badge" style="cursor:pointer;" onclick="openLogModal('${r.room_id}','${date}')">✏️ แก้ไข</span>`
+                : `<span class="edited-badge" style="cursor:default;">✏️ แก้ไข</span>`)
+            : '';
           html += `
             <tr>
-              <td class="col-left"><strong>${r.room_id}</strong></td>
+              <td class="col-left"><strong>${r.room_id}</strong>${editedCell}</td>
               <td class="col-left">${r.homeroom || '-'}</td>
               ${r.scores.map(s => `<td>${s}</td>`).join('')}
               <td><strong>${r.total}</strong></td>
@@ -517,6 +590,77 @@
 
     function noDataHTML(msg) {
       return `<div class="no-data">📭 ${msg}</div>`;
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  Popup Modal — ประวัติการแก้ไข (admin เท่านั้น)
+    // ════════════════════════════════════════════════════════
+    const modal      = document.getElementById('log-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody  = document.getElementById('modal-body');
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+    modal.addEventListener('click', e => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+
+    async function openLogModal(room_id, date) {
+      if (!isAdmin()) return;
+      modalTitle.textContent = `ประวัติการแก้ไข — ห้อง ${room_id} วันที่ ${date}`;
+      modalBody.innerHTML    = loadingHTML();
+      modal.classList.add('active');
+
+      try {
+        const res = await API.getScoreLogs(room_id, date);
+        if (!res.success) {
+          modalBody.innerHTML = errorHTML(res.message);
+          return;
+        }
+        if (!res.logs || res.logs.length === 0) {
+          modalBody.innerHTML = noDataHTML('ไม่พบประวัติการแก้ไข');
+          return;
+        }
+        modalBody.innerHTML = renderLogTable(res.logs);
+      } catch (err) {
+        modalBody.innerHTML = errorHTML(err.message);
+      }
+    }
+
+    function renderLogTable(logs) {
+      let html = `
+        <p class="text-muted" style="margin-bottom:.875rem;">
+          พบการแก้ไขทั้งหมด <strong>${logs.length}</strong> ครั้ง
+        </p>
+        <div style="overflow-x:auto;">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th class="col-left">เวลา</th>
+                <th class="col-left">ผู้แก้ไข</th>
+                <th>คะแนนเดิม</th>
+                <th>รวมเดิม</th>
+                <th>คะแนนใหม่</th>
+                <th>รวมใหม่</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      logs.forEach(log => {
+        html += `
+          <tr>
+            <td class="col-left" style="font-size:.8125rem;">${log.timestamp}</td>
+            <td class="col-left">${log.inspector_id}</td>
+            <td style="font-size:.8125rem;">${log.old_scores.join(', ')}</td>
+            <td><strong style="color:var(--danger);">${log.old_total}</strong></td>
+            <td style="font-size:.8125rem;">${log.new_scores.join(', ')}</td>
+            <td><strong style="color:var(--success);">${log.new_total}</strong></td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table></div>`;
+      return html;
     }
 
   </script>
