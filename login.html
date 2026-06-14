@@ -152,9 +152,13 @@
         const res = await API.login(username, password);
 
         if (res.success) {
-          // บันทึก session แล้วไปหน้าคีย์คะแนน
+          // บันทึก session แล้วไปหน้าที่เหมาะสมตาม role
           saveSession(res.token, res.inspector_id, res.display_name, res.role);
-          navigate(CONFIG.PAGES.INPUT);
+          if (res.role === 'admin') {
+            navigate(CONFIG.PAGES.HOME);   // admin → หน้าหลัก
+          } else {
+            navigate(CONFIG.PAGES.INPUT);  // เด็กสภา → หน้าคีย์คะแนน
+          }
         } else {
           showAlert(res.message || 'Username หรือ Password ไม่ถูกต้อง');
           passwordEl.value = '';
