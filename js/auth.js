@@ -85,7 +85,11 @@ function requireLogin() {
 // ============================================================
 function requireGuest() {
   if (isLoggedIn()) {
-    navigate(CONFIG.PAGES.INPUT);
+    if (isAdmin()) {
+      navigate(CONFIG.PAGES.HOME);
+    } else {
+      navigate(CONFIG.PAGES.INPUT);
+    }
   }
 }
 
