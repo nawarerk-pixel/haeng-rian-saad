@@ -341,8 +341,8 @@
                 : `<span class="edited-badge" style="cursor:default;">✏️ แก้ไข</span>`)
             : '';
           const inspectorText = r.inspector_position
-            ? `${r.inspector_id} (${r.inspector_position})`
-            : r.inspector_id;
+            ? `${r.inspector_name} (${r.inspector_position})`
+            : r.inspector_name;
           html += `
             <tr>
               <td class="col-left"><strong>${r.room_id}</strong>${editedCell}</td>
@@ -650,8 +650,8 @@
       `;
       logs.forEach(log => {
         const inspectorText = log.inspector_position
-          ? `${log.inspector_id} (${log.inspector_position})`
-          : log.inspector_id;
+          ? `${log.inspector_name} (${log.inspector_position})`
+          : log.inspector_name;
         html += `
           <tr>
             <td class="col-left" style="font-size:.8125rem;">${log.timestamp}</td>
