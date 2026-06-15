@@ -328,21 +328,21 @@
                   ${CONFIG.CRITERIA.map((_, i) => `<th>ข้อ ${i+1}</th>`).join('')}
                   <th>รวม</th>
                   <th>ผล</th>
+                  <th class="col-left">ผู้ตรวจ</th>
                 </tr>
               </thead>
               <tbody>
         `;
         grouped[building].forEach(r => {
           // badge ✏️ แสดงทุกคน ถ้ามีการแก้ไข
-          const editedBadge = r.edited
-            ? `<span class="edited-badge" data-room="${r.room_id}" data-date="${date}">✏️ แก้ไข</span>`
-            : '';
-          // ถ้าเป็น admin ให้ badge กดได้ → เปิด popup
           const editedCell = r.edited
             ? (isAdmin()
                 ? `<span class="edited-badge" style="cursor:pointer;" onclick="openLogModal('${r.room_id}','${date}')">✏️ แก้ไข</span>`
                 : `<span class="edited-badge" style="cursor:default;">✏️ แก้ไข</span>`)
             : '';
+          const inspectorText = r.inspector_position
+            ? `${r.inspector_id} (${r.inspector_position})`
+            : r.inspector_id;
           html += `
             <tr>
               <td class="col-left"><strong>${r.room_id}</strong>${editedCell}</td>
@@ -353,6 +353,7 @@
                 ? '<span class="badge-pass">✅ ผ่าน</span>'
                 : '<span class="badge-fail">❌ ไม่ผ่าน</span>'
               }</td>
+              <td class="col-left">${inspectorText}</td>
             </tr>
           `;
         });
@@ -648,10 +649,13 @@
             <tbody>
       `;
       logs.forEach(log => {
+        const inspectorText = log.inspector_position
+          ? `${log.inspector_id} (${log.inspector_position})`
+          : log.inspector_id;
         html += `
           <tr>
             <td class="col-left" style="font-size:.8125rem;">${log.timestamp}</td>
-            <td class="col-left">${log.inspector_id}</td>
+            <td class="col-left">${inspectorText}</td>
             <td style="font-size:.8125rem;">${log.old_scores.join(', ')}</td>
             <td><strong style="color:var(--danger);">${log.old_total}</strong></td>
             <td style="font-size:.8125rem;">${log.new_scores.join(', ')}</td>
