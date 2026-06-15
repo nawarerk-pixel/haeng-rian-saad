@@ -157,7 +157,8 @@
     // ── ตรวจสอบ login ────────────────────────────────────
     const session = requireLogin();
     if (session) {
-      document.getElementById('display-name').textContent = session.display_name;
+      const positionText = session.position ? ` (${session.position})` : '';
+      document.getElementById('display-name').textContent = `${session.display_name}${positionText}`;
     }
 
     // ── Elements ──────────────────────────────────────────
