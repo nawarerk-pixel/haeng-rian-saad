@@ -18,8 +18,8 @@ const SESSION_KEY = 'haeng_rian_session';
 //  saveSession(token, inspector_id, display_name)
 //  เก็บข้อมูล session หลัง login สำเร็จ
 // ============================================================
-function saveSession(token, inspector_id, display_name, role) {
-  const session = { token, inspector_id, display_name, role: role || 'inspector' };
+function saveSession(token, inspector_id, display_name, position, role) {
+  const session = { token, inspector_id, display_name, position: position || '', role: role || 'inspector' };
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
