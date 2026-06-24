@@ -11,9 +11,9 @@
 }
 
 :root {
-  --primary       : #2563eb;
-  --primary-dark  : #1d4ed8;
-  --primary-light : #eff6ff;
+  --primary       : #16A34A;
+  --primary-dark  : #15803D;
+  --primary-light : #F0FDF4;
   --success       : #16a34a;
   --success-light : #f0fdf4;
   --danger        : #dc2626;
