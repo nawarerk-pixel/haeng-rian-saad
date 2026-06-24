@@ -419,9 +419,10 @@
         </div>
       `;
 
-      // ตารางสรุปเหรียญแยกระดับชั้น
+      // ตารางสรุปเหรียญแยกระดับชั้น (ม.ต้น/ม.ปลาย)
       const allLevels = ['ม.ต้น', 'ม.ปลาย'];
       html += `
+        <p style="font-weight:700; margin-bottom:.5rem;">สรุปตามช่วงชั้น</p>
         <div style="overflow-x:auto; margin-bottom:1.25rem;">
           <table class="report-table">
             <thead>
@@ -440,6 +441,36 @@
                     </span>
                   </td>
                   ${allLevels.map(l => `<td>${summary[medal].by_level[l] || 0}</td>`).join('')}
+                  <td><strong>${summary[medal].total}</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // ตารางสรุปเหรียญแยกระดับชั้น (ม.1-ม.6)
+      const allGrades = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'];
+      html += `
+        <p style="font-weight:700; margin-bottom:.5rem;">สรุปตามระดับชั้น</p>
+        <div style="overflow-x:auto; margin-bottom:1.25rem;">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th class="col-left">เหรียญ</th>
+                ${allGrades.map(g => `<th>${g}</th>`).join('')}
+                <th>รวม</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${['gold','silver','bronze'].map(medal => `
+                <tr>
+                  <td class="col-left">
+                    <span class="medal-badge ${CONFIG.MEDAL_CLASS[medal]}">
+                      ${CONFIG.MEDAL_LABEL[medal]}
+                    </span>
+                  </td>
+                  ${allGrades.map(g => `<td>${summary[medal].by_grade[g] || 0}</td>`).join('')}
                   <td><strong>${summary[medal].total}</strong></td>
                 </tr>
               `).join('')}
