@@ -330,6 +330,7 @@
                   <th>รวม</th>
                   <th>ผล</th>
                   <th class="col-left">ผู้ตรวจ</th>
+                  <th class="col-left">เวลาคีย์</th>
                 </tr>
               </thead>
               <tbody>
@@ -355,6 +356,7 @@
                 : '<span class="badge-fail">❌ ไม่ผ่าน</span>'
               }</td>
               <td class="col-left">${inspectorText}</td>
+              <td class="col-left" style="font-size:.8125rem; color:var(--gray-400);">${r.timestamp || '-'}</td>
             </tr>
           `;
         });
