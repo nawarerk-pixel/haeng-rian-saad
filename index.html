@@ -8,6 +8,47 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── โซนวันเวลาปัจจุบัน (อยู่ใน hero) ───────────────── */
+    .clock-pill {
+      display        : inline-flex;
+      align-items    : center;
+      justify-content: center;
+      flex-wrap      : wrap;
+      gap            : .25rem .75rem;
+      margin-top     : 1rem;
+      padding        : .4rem 1.125rem;
+      background     : rgba(255,255,255,.15);
+      border         : 1px solid rgba(255,255,255,.3);
+      border-radius  : 999px;
+      color          : var(--white);
+      font-size      : .9375rem;
+      font-weight    : 600;
+    }
+    .clock-time { font-variant-numeric: tabular-nums; }
+
+    /* ── กล่องประกาศ ───────────────────────────────────── */
+    .announce {
+      border-radius    : var(--radius-lg);
+      padding          : .875rem 1.125rem;
+      margin-bottom    : .75rem;
+      border           : 1px solid var(--gray-200);
+      border-left-width: 5px;
+      box-shadow       : var(--shadow);
+    }
+    .announce-title {
+      font-weight  : 700;
+      margin-bottom: .125rem;
+    }
+    .announce-msg {
+      white-space: pre-line;   /* เคารพการขึ้นบรรทัดใหม่ที่พิมพ์ในชีต */
+      color      : var(--gray-800);
+      word-break : break-word;
+    }
+    .announce-info    { background: var(--primary-light); border-left-color: var(--primary); }
+    .announce-warning { background: var(--warning-light); border-left-color: var(--warning); }
+    .announce-success { background: var(--success-light); border-left-color: var(--success); }
+  </style>
 </head>
 <body>
 
@@ -39,6 +80,13 @@
         โรงเรียนท่าตูมประชาเสริมวิทย์
       </p>
       <p>ตรวจสอบผลคะแนนความสะอาดห้องเรียนของคุณได้ที่นี่</p>
+
+      <!-- วันเวลาปัจจุบัน (อัปเดตทุกวินาที) -->
+      <div class="clock-pill" id="clock-pill">
+        <span id="clock-date">📅 กำลังโหลด...</span>
+        <span class="clock-time" id="clock-time"></span>
+      </div>
+
       <div class="hero-actions">
         <a href="report.html" class="btn btn-outline">📊 ดูผลการตรวจ</a>
         <a href="login.html" class="btn btn-ghost" id="hero-btn-inspector">🔐 เข้าสู่ระบบ (ผู้ตรวจ)</a>
@@ -48,6 +96,9 @@
 
   <!-- ── Content ────────────────────────────────────────── -->
   <main class="container" style="padding-bottom: 3rem;">
+
+    <!-- กล่องประกาศ (ดึงจาก Sheet "announcements" ซ่อนไว้จนกว่าจะมีประกาศ) -->
+    <div id="announcements" class="hidden"></div>
 
     <!-- เกณฑ์การตรวจ -->
     <div class="card mb-6">
@@ -129,6 +180,70 @@
   <script src="js/auth.js"></script>
   <script src="js/api.js"></script>
   <script>
+    // ── นาฬิกา / วันเวลาปัจจุบัน (เขตเวลาไทย แสดงปี พ.ศ.) ───
+    const dateFmt = new Intl.DateTimeFormat('th-TH', {
+      timeZone: 'Asia/Bangkok',
+      weekday : 'long',
+      day     : 'numeric',
+      month   : 'long',
+      year    : 'numeric'
+    });
+    const timeFmt = new Intl.DateTimeFormat('th-TH', {
+      timeZone  : 'Asia/Bangkok',
+      hour      : '2-digit',
+      minute    : '2-digit',
+      second    : '2-digit',
+      hourCycle : 'h23'
+    });
+
+    function tickClock() {
+      const now = new Date();
+      document.getElementById('clock-date').textContent = '📅 ' + dateFmt.format(now);
+      document.getElementById('clock-time').textContent = '🕐 ' + timeFmt.format(now) + ' น.';
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    // ── กล่องประกาศ (ดึงจาก Sheet "announcements") ──────────
+    // ถ้าโหลดไม่ได้ จะซ่อนกล่องไว้เงียบๆ ไม่ให้หน้าหลักพัง
+    const ANNOUNCE_ICONS = { info: '📢', warning: '⚠️', success: '🎉' };
+
+    async function loadAnnouncements() {
+      const box = document.getElementById('announcements');
+      try {
+        const res = await API.getAnnouncements();
+        if (!res || !res.success || !res.items || res.items.length === 0) return;
+
+        res.items.forEach(item => {
+          const type = ANNOUNCE_ICONS[item.type] ? item.type : 'info';
+          const icon = ANNOUNCE_ICONS[type];
+
+          const div = document.createElement('div');
+          div.className = 'announce announce-' + type;
+
+          // ใช้ textContent เสมอ เพื่อไม่ให้โค้ดแปลกปลอมในชีตรันบนหน้าเว็บ
+          if (item.title) {
+            const t = document.createElement('div');
+            t.className   = 'announce-title';
+            t.textContent = icon + ' ' + item.title;
+            div.appendChild(t);
+          }
+
+          const m = document.createElement('div');
+          m.className   = 'announce-msg';
+          m.textContent = (item.title ? '' : icon + ' ') + item.message;
+          div.appendChild(m);
+
+          box.appendChild(div);
+        });
+
+        box.classList.remove('hidden');
+      } catch (_) {
+        // เงียบไว้
+      }
+    }
+    loadAnnouncements();
+
     // ── แสดงหัวข้อการตรวจในตาราง ────────────────────────
     const tbody = document.getElementById('criteria-table-body');
     CONFIG.CRITERIA.forEach((label, i) => {
