@@ -12,6 +12,37 @@
 const API = {
 
   // ============================================================
+  //  API._request(makeRequest, retries)
+  //  ตัวกลางส่ง request: มี timeout 20 วินาที
+  //  และลองใหม่อัตโนมัติถ้า server ตอบกลับมาไม่ใช่ JSON
+  //  (เช่น Apps Script ช้า/ไม่ว่าง แล้วตอบเป็นหน้า HTML)
+  // ============================================================
+  async _request(makeRequest, retries = 2) {
+    let lastErr;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const ctrl  = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000);
+      try {
+        const res  = await makeRequest(ctrl.signal);
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch (_) {
+          throw new Error('server ตอบกลับไม่ใช่ JSON');
+        }
+      } catch (err) {
+        lastErr = err;
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    throw new Error('เซิร์ฟเวอร์ไม่ว่างหรือตอบช้า กรุณารอสักครู่แล้วลองใหม่ (' + lastErr.message + ')');
+  },
+
+  // ============================================================
   //  API.post(body)
   //  ส่ง POST request ไปหา Apps Script
   //
@@ -20,22 +51,15 @@ const API = {
   //  คืนค่า: response object จาก Apps Script
   //  ถ้าเกิด error: throw Error พร้อม message
   // ============================================================
-  async post(body) {
-    try {
-      const res = await fetch(CONFIG.API_URL, {
-        method : 'POST',
-        // Apps Script ต้องการ text/plain ไม่ใช่ application/json
-        // เพราะ CORS ของ Google จะ block preflight OPTIONS request
-        headers: { 'Content-Type': 'text/plain' },
-        body   : JSON.stringify(body)
-      });
-
-      const data = await res.json();
-      return data;
-
-    } catch (err) {
-      throw new Error('เชื่อมต่อ server ไม่ได้: ' + err.message);
-    }
+  post(body) {
+    return this._request(signal => fetch(CONFIG.API_URL, {
+      method : 'POST',
+      // Apps Script ต้องการ text/plain ไม่ใช่ application/json
+      // เพราะ CORS ของ Google จะ block preflight OPTIONS request
+      headers: { 'Content-Type': 'text/plain' },
+      body   : JSON.stringify(body),
+      signal
+    }));
   },
 
   // ============================================================
@@ -48,17 +72,9 @@ const API = {
   //
   //  คืนค่า: response object จาก Apps Script
   // ============================================================
-  async get(params) {
-    try {
-      const qs  = new URLSearchParams(params).toString();
-      const url = `${CONFIG.API_URL}?${qs}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      return data;
-
-    } catch (err) {
-      throw new Error('เชื่อมต่อ server ไม่ได้: ' + err.message);
-    }
+  get(params) {
+    const qs = new URLSearchParams(params).toString();
+    return this._request(signal => fetch(`${CONFIG.API_URL}?${qs}`, { signal }));
   },
 
   // ============================================================
@@ -120,12 +136,12 @@ const API = {
   },
 
   // ============================================================
-  //  API.getTermReport(term)
-  //  สรุปรายภาคเรียน (แบบที่ 3)
-  //  term เช่น '2568-T1'
+  //  API.getTermReport(start_month, end_month)
+  //  สรุปรายภาคเรียน (แบบที่ 3) เลือกช่วงเดือนเอง
+  //  start_month / end_month เช่น '2026-05' และ '2026-10'
   // ============================================================
-  async getTermReport(term) {
-    return await this.get({ action: 'getTermReport', term });
+  async getTermReport(start_month, end_month) {
+    return await this.get({ action: 'getTermReport', start_month, end_month });
   },
 
   // ============================================================
